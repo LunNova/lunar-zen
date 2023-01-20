@@ -89,6 +89,28 @@ nav {
     display: inline;
 }
 
+.header-left img {
+    margin-top: -10px;
+}
+
+.header-right nav li:not(:last-child)::after {
+    content: "|";
+    color: $luna_hair_fill;
+}
+
+nav ul {
+    margin: 0;
+    padding: 0;
+}
+
+td, th {
+    padding: 0.5rem 0.7rem 0.5rem 0.7rem;
+}
+td:not(:last-child) {
+    text-align: center;
+    border-right: 1px solid $luna_hair_fill;
+}
+
 ul {
     list-style: none inside none;
     list-style-type: "·";
@@ -268,3 +290,4 @@ figcaption {
     padding: 3px;
     text-align: center;
 }
+
