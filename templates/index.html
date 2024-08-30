@@ -165,7 +165,11 @@
                     Copyright &copy; {{ config.extra.author }} {% if config.extra.license %} {{ config.extra.license | safe }} {% endif %}
                 </small>
                 <small class="footer-right">
+                    {%- if page and page.title -%}
+                    Rendered from <a href="https://github.com/LunNova/Blog/tree/main/content/{{ page.relative_path }}">{{ page.relative_path }}</a>
+                    {%- else -%}
                     Powered by <a href="https://www.getzola.org" title="zola static site generator's website">Zola</a> | Theme <a href="https://github.com/LunNova/lunar-zen">lunar-zen</a>
+                    {%- endif -%}
                 </small>
             </div>
         {% endblock footer %}
