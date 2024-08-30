@@ -63,12 +63,12 @@
         {% endblock fbmeta %}
 
         {%- block twittermeta -%}
-        <meta name=”twitter:card” content=”summary” />
-        <meta name=”twitter:site” content=”@{{ config.extra.twitter }}” />
-        <meta name=”twitter:title” content=”{{ title }}” />
-        <meta name=”twitter:description” content=”{{ description }}” />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:site" content="@{{ config.extra.twitter }}" />
+        <meta name="twitter:title" content="{{ title }}" />
+        <meta name="twitter:description" content="{{ description }}" />
         {% if page_icon %}
-        <meta name=”twitter:image” content=”{{ get_url(path=page_icon) }}” />
+        <meta name="twitter:image" content="{{ get_url(path=page_icon) }}" />
         {% endif %}
         {%- endblock twittermeta -%}
 
