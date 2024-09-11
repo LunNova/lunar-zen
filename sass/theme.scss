@@ -1,33 +1,45 @@
 @import "colors";
 @import "luna_palette";
 
-@font-face {
-    font-family: 'Iosevka';
-    src: url("fonts/iosevka-regular.woff2");
-    font-display: optional;
-}
-@font-face {
-    font-family: 'Iosevka';
-    src: url("fonts/iosevka-italic.woff2");
-    font-style: italic;
-    font-display: optional;
-}
-@font-face {
-    font-family: 'Iosevka';
-    src: url("fonts/iosevka-bold.woff2");
-    font-weight: bold;
-    font-display: optional;
-}
-@font-face {
-    font-family: 'Iosevka';
-    src: url("fonts/iosevka-bolditalic.woff2");
-    font-weight: bold;
-    font-style: italic;
-    font-display: optional;
+/* Mobile devices should get optional fonts */
+@media only screen and (max-device-width: 479px) {
+    @font-face {
+        font-family: 'Iosevka';
+        src: url("/fonts/iosevka-regular.woff2");
+        font-display: optional;
+    }
 }
 
-$font: "Iosevka", sans-serif;
-$font-mono:  "Iosevka", monospace;
+/* Desktops should use fallback */
+@media (min-device-width: 480px) {
+    @font-face {
+        font-family: 'Iosevka';
+        src: url("/fonts/iosevka-regular.woff2");
+        font-display: fallback;
+    }
+    @font-face {
+        font-family: 'Iosevka';
+        src: url("/fonts/iosevka-italic.woff2");
+        font-style: italic;
+        font-display: fallback;
+    }
+    @font-face {
+        font-family: 'Iosevka';
+        src: url("/fonts/iosevka-bold.woff2");
+        font-weight: bold;
+        font-display: fallback;
+    }
+    @font-face {
+        font-family: 'Iosevka';
+        src: url("/fonts/iosevka-bolditalic.woff2");
+        font-weight: bold;
+        font-style: italic;
+        font-display: fallback;
+    }
+}
+
+$font: "Iosevka", "Fira Sans", "Roboto", "Helvetica", sans-serif;
+$font-mono: "Iosevka", "Fira Mono", "Roboto Mono", "Consolas", monospace;
 $padding: 8px;
 
 * {
@@ -36,17 +48,8 @@ $padding: 8px;
 
 body {
     font: 100% $font;
-    background: $black;
+    background: black;
     color: $white;
-}
-
-body {
-    display: grid;
-    grid-template-columns: auto;
-    grid-template-areas:
-        "header"
-        "main"
-        "footer";
 }
 
 header {
@@ -83,10 +86,18 @@ footer {
 
 nav {
     list-style-type: none;
+    text-transform: lowercase;
 }
 
-.nav {
+.nav, address {
     display: inline;
+}
+
+.home-link {
+    font-size: 26px;
+    letter-spacing: -2px;
+    font-family: monospace, 'Iosevka';
+    font-family: 'Consolas', 'Andale Mono', 'Lucida Console', monospace;
 }
 
 .header-left img {
@@ -128,7 +139,10 @@ ul ul {
 a {
     font-size: none;
     color: $blue;
-    text-decoration: none;
+}
+
+main a:visited, footer a:visited {
+    color: $luna_hair_stroke;
 }
 
 h1 {
@@ -177,11 +191,6 @@ p > code {
     color: $gray;
 }
 
-.logo {
-    font-size: 26px;
-    font-weight: bold;
-}
-
 .date {
     color: $gray_light;
     font-size: 14px;
@@ -215,10 +224,6 @@ p > code {
 
 img {
     max-width: 100%;
-}
-
-body {
-    background: black;
 }
 
 hr {
