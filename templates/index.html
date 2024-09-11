@@ -2,8 +2,11 @@
 {%- set title = config.title -%}
 {%- set description = config.description | default(value=false) -%}
 {%- set page_icon = config.extra.icon | default(value=false) -%}
+{%- set css = load_data(path="/theme.css") -%}
 {%- if page and page.title -%}
 {%- set title = page.title ~ ' | ' ~ title -%}
+{%- elif section and section.title -%}
+{%- set title = section.title ~ ' | ' ~ title -%}
 {%- endif -%}
 {%- if page and page.description -%}
 {%- set description = page.description -%}
@@ -17,22 +20,21 @@
 {%- set page_url = get_url(path="404.html") -%}
 {%- endif -%}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:black;min-height:100vh;min-width:100vw;">
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
 
         <title>{{ title }}</title>
         <meta name="description" content="{{ config.description }}">
-        <meta name="author" content="{{ page.author | default(value=config.extra.author) | default() }}">
-
-        <link rel="preload" href="{{ get_url(path="fonts/iosevka-regular.woff2") }}" as="font">
-
+        <meta name="author" content="{{ page.author | default(value=config.extra.meta_author) | default() }}">
         {% block favicon -%}
         <link rel="icon" href="{{ get_url(path="favicon.ico") }}">
         {%- endblock favicon -%}
-
         <link rel="canonical" href="{{ page_url | safe }}">
+        {% block css %}
+        <style>{{ css | safe }}</style>
+        {% endblock css %}
 
         {% block feed_link -%}
         {%- if config.generate_feeds %}
@@ -47,24 +49,30 @@
         {%- endfor %}
         {%- endif -%}
         {%- endblock feed_link -%}
+        {% if config.extra.head_comment %}
+        <!-- {{ config.extra.head_comment }} -->
+        {% endif %}
+        {% if config.extra.github %}
+        <link rel="author" href="https://github.com/{{ config.extra.github }}">
+        {% endif %}
 
-        {% block css %}
-        <link rel="stylesheet" href="{{ get_url(path="theme.css", trailing_slash=false) | safe }}">
-        {% endblock css %}
-
+        {% if current_path and current_path is starting_with("/tags/") %}
+        <!-- Noindex tag pages because they're "thin" and don't have any additional content other than a list of posts -->
+        <!-- FIXME: tags with many pages might actually be useful to index-->
+        <meta name="robots" content="noindex">
+        {% endif %}
         {% block fbmeta %}
         <meta property="og:type" content="website">
-        <meta property="og:url" content="{{ get_url(path="/", trailing_slash=true) }}">
+        <meta property="og:url" content="{{ page_url }}">
+        <meta property="og:site_name" content="{{ config.title }}">
         <meta property="og:title" content="{{ title }}">
         <meta property="og:description" content="{{ description }}">
         {% if page_icon %}
         <meta property="og:image" content="{{ get_url(path=page_icon) }}">
         {% endif %}
         {% endblock fbmeta %}
-
         {%- block twittermeta -%}
         <meta name="twitter:card" content="summary" />
-        <meta name="twitter:site" content="@{{ config.extra.twitter }}" />
         <meta name="twitter:title" content="{{ title }}" />
         <meta name="twitter:description" content="{{ description }}" />
         {% if page_icon %}
@@ -72,64 +80,176 @@
         {% endif %}
         {%- endblock twittermeta -%}
 
-        {%- block extra_head -%}
-        {%- endblock extra_head -%}
+        {%- block extra_head -%}{%- endblock extra_head -%}
+{%- block structured_data -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": {{ config.title | json_encode() | safe }},
+  "url": {{ get_url(path="/", trailing_slash=true) | json_encode() | safe }},
+  {% if config.extra.github %}
+  "author": {
+    "@id": "https://github.com/{{ config.extra.github }}",
+    "@type": "Person",
+    "name": "{{ config.extra.author }}",
+    "url": "https://github.com/{{ config.extra.github }}"
+  },
+  {% endif %}
+  "mainEntity": {
+    "@type": "ItemList",
+    "itemListElement": [
+      {% set index = get_section(path="_index.md") %}
+      {% for s in index.subsections %}
+        {% set subsection = get_section(path=s) %}
+        {
+          "@type": "ListItem",
+          "position": {{ loop.index }},
+          "name": {{ subsection.title | json_encode() | safe }},
+          "url": {{ subsection.permalink | json_encode() | safe }}
+        }{% if not loop.last %},{% endif %}
+      {% endfor %}
+    ]
+  },
+  "breadcrumb": {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+    {% if page and page.ancestors %}
+    {% set len = page.ancestors | length %}
+    {% for section_path in page.ancestors %}
+    {
+        {% set section = get_section(path=section_path) %}
+        "@type": "ListItem",
+        "position": {{ loop.index }},
+        "name": {{ section.title | json_encode() | safe }},
+        "item": {{ section.permalink | json_encode() | safe }},
+        "desc": {{ section.description | default(value="") | json_encode() | safe }},
+        "url": {{ section.permalink | json_encode() | safe }}
+    },
+    {% endfor %}
+    {% else %}
+    {% set len = 0 %}
+    {% endif %}
+    {
+        "@type": "ListItem",
+        "position": {{ len + 1 }},
+        "name": {{ page.title | default(value=config.title) | json_encode | safe }},
+        "item": {{ page.permalink | default(value=page_url) | json_encode | safe }},
+        "desc": {{ page.description | default(value="") | json_encode | safe }},
+        "url": {{ page.permalink | default(value=page_url) | json_encode | safe }}
+    }
+    ]
+    }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SiteNavigationElement",
+  "name": [
+    {% set index = get_section(path="_index.md") %}
+    {% for s in index.subsections %}
+      {% set subsection = get_section(path=s) %}
+      {{ subsection.title | json_encode() | safe }}{% if not loop.last %},{% endif %}
+    {% endfor %}
+    {% if config.extra.github %}
+    ,"{{ config.extra.github }} on GitHub"
+    {% endif %}
+  ],
+  "url": [
+    {% for s in index.subsections %}
+      {% set subsection = get_section(path=s) %}
+      {{ subsection.permalink | json_encode() | safe }}{% if not loop.last %},{% endif %}
+    {% endfor %}
+    {% if config.extra.github %}
+    ,"https://github.com/{{ config.extra.github }}"
+    {% endif %}
+  ]
+}
+</script>
+
+{%- endblock structured_data -%}
     </head>
     <body>
         <div class="content">
         {% block body%}
         {% block header %}
-            <header>
+            <header role="banner">
                 <div class="header-left" style="flex: 1">
-                    <nav itemscope itemtype="http://schema.org/SiteNavigationElement">
-                        <ul>
-                          {% if config.extra.github %}
-                          <li class="nav">
-                              <a itemprop="url" href="https://github.com/{{ config.extra.github }}">
-                                  <img class="icon" height=32 width=32 src="{{ get_url(path="icons/github.svg") }}" alt="Github">
-                              </a>
-                          </li>
-                          {% endif %}
-                          {% if config.extra.twitter %}
-                          <li class="nav">
-                              <a itemprop="url" href="https://twitter.com/{{ config.extra.twitter }}">
-                                  <img class="icon" src="{{ get_url(path="icons/twitter.svg") }}" alt="Twitter">
-                              </a>
-                          </li>
-                          {% endif %}
-                          {% if page_icon %}
-                          <li class="nav">
-                              <a href="https://github.com/LunNova">
-                              <img class="icon" src="{{ get_url(path=page_icon) }}" alt="{{ config.extra.icon_alt }}" style="vertical-align:middle" />
-                              </a>
-                          </li>
-                          {% endif %}
-                          <li class="nav">
-                            <a href="{{ get_url(path="/", trailing_slash=true) }}" class="logo">{{ config.title }}</a>
-                          </li>
-                        </ul>
-                      </nav>
+                    {%block header_left%}
+                    <nav aria-label="Breadcrumb" style="float: left; padding-right: 0.5rem;">
+                    {% set crumbs = section.ancestors | default(value=[]) %}
+                    {% if section %}
+                        {% set crumbs = crumbs | concat(with=section.relative_path) %}
+                    {% endif %}
+                    {% for crumb_path in crumbs %}
+                    {% set crumb = get_section(path=crumb_path) %}
+                    {% if loop.last %}
+
+                    {% else %}
+                    <a href="{{ crumb.permalink | default(value=get_url(path="/")) }}"><span>{{ crumb.title | default(value=config.title) }}</span></a> /
+                    {% endif %}
+                    {% endfor %}
+                    {% if page %}
+                        {% if crumbs %}/{% endif %}
+                        <li class="breadcrumb-item active" aria-current="page" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+                            <span itemprop="name">{{ page.title }}</span>
+                            <meta itemprop="position" content="{{ crumbs | length + 1 }}" />
+                        </li>
+                    {% endif %}
+                    </nav>
+                    {%endblock header_left%}
                 </div>
                 <div class="header-right">
-                    <nav itemscope itemtype="http://schema.org/SiteNavigationElement">
+                    <nav itemscope itemtype="http://schema.org/SiteNavigationElement" aria-label="Main navigation">
                     <ul>
                       {% set index = get_section(path="_index.md") %}
                       {% for s in index.subsections %}
                           {% set subsection = get_section(path=s) %}
                           <li class="nav">
-                              <a itemprop="url" href="{{ subsection.permalink | safe}}">
-                                  <span itemprop="name">{{ subsection.title }}</span>
-                              </a>
+                              <a itemprop="url" href="{{ subsection.permalink | safe}}"><span itemprop="name">{{ subsection.title }}</span></a>
                           </li>
                       {% endfor %}
-                      </ul>
-                      </nav>
+                      {% if config.extra.github %}
+                      <li class="nav">
+                          <a itemprop="url" href="https://github.com/{{ config.extra.github }}" aria-label="GitHub">
+                            <span itemprop="name"><img class="icon" height=24 width=24 src="{{ get_url(path="icons/github.svg") }}" alt="Github"></span>
+                          </a>
+                      </li>
+                      {% endif %}
+                    </ul>
+                    </nav>
                 </div>
             </header>
         {% endblock header %}
         {% block content %}
-        <main>
+        <main id="main-content">
             {% block main %}
+            <nav aria-label="Breadcrumb">
+                <ol class="breadcrumb" itemscope itemtype="https://schema.org/BreadcrumbList">
+                    {% set crumbs = section.ancestors | default(value=[]) | reverse %}
+                    {% if section %}
+                        {% set crumbs = crumbs | concat(with=section) %}
+                    {% endif %}
+                    {% for crumb in crumbs %}
+                        <li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+                            <a itemprop="item" href="{{ crumb.permalink | default(value=get_url(path="/")) }}">
+                                <span itemprop="name">{{ crumb.title | default(value=config.title) }}</span>
+                            </a>
+                            <meta itemprop="position" content="{{ loop.index }}" />
+                        </li>
+                        {% if not loop.last %}/{% endif %}
+                    {% endfor %}
+                    {% if page %}
+                        {% if crumbs %}/{% endif %}
+                        <li class="breadcrumb-item active" aria-current="page" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+                            <span itemprop="name">{{ page.title }}</span>
+                            <meta itemprop="position" content="{{ crumbs | length + 1 }}" />
+                        </li>
+                    {% endif %}
+                </ol>
+            </nav>
             <h1>Index</h1>
             <hr>
                 <ul>
@@ -157,7 +277,7 @@
             {% endblock main %}
         </main>
         {% endblock content %}
-        <footer>
+        <footer role="contentinfo">
             {% block footer %}
             <hr>
             <div class="footer">

@@ -2,21 +2,83 @@
 
 {% block title %} {{ page.title }} | {{ config.title }} {% endblock title %}
 
+{% block structured_data %}
+{{ super() }}
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@id": {{ page.permalink | json_encode() | safe }},
+  "@type": "BlogPosting",
+  "headline": {{ page.title | json_encode() | safe }},
+  "name": {{ page.title | json_encode() | safe }},
+  "datePublished": "{{ page.date | date(format="%Y-%m-%dT%H:%M:%S%:z") }}",
+  "author": {
+    "@id": "https://github.com/{{ config.extra.github }}",
+    "@type": "Person",
+    "name": "{{ config.extra.author }}",
+    "url": "https://github.com/{{ config.extra.github }}"
+  },
+  "articleBody": {{ page.content | striptags | truncate(length=400) | json_encode() | safe }},
+  {% if page.taxonomies.categories %}
+  "articleSection": "{{ page.taxonomies.categories[0] }}",
+  {% endif %}
+  {% if page.taxonomies.tags %}
+  "keywords": [
+    {% for tag in page.taxonomies.tags %}
+    "{{ tag }}"{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ],
+  {% endif %}
+  "url": "{{ current_url | safe }}"
+}
+</script>
+{% endblock structured_data %}
+
+{% block header_left %}
+<nav aria-label="Breadcrumb" style="float: left; padding-right: 0.5rem;">
+    {% set crumbs = page.ancestors | default(value=[]) %}
+    {% if section %}
+    {% set crumbs = crumbs | concat(with=section.relative_path) %}
+    {% endif %}
+    {% for crumb_path in crumbs %}
+    {% set crumb = get_section(path=crumb_path) %}
+    {% if false and loop.last %}
+    <span>{{ crumb.title | default(value=config.title) }}</span>
+    {% else %}
+    <a href="{{ crumb.permalink | default(value=get_url(path="/")) }}"><span>{{ crumb.title | default(value=config.title) }}</span></a>
+    /{% endif %}
+    {% endfor %}
+     </nav>
+{% endblock header_left %}
+
 {% block main %}
-<article itemscope itemtype="http://schema.org/BlogPosting">
-    <div itemprop="headline">
-        <h1>{{ page.title }}</h1>
+<article itemscope itemtype="http://schema.org/BlogPosting" itemid="{{ page.permalink | safe }}">
+    <div>
+        <h1 itemprop="name">{{ page.title }}</h1>
+        {% if page.description %}
+        <span class="article-description" itemprop="description"><em>{{ page.description }}</em></span>
+        {% endif %}
         <hr class="small">
-        <time datetime="{{ page.date | date(format="%F") }}" class="date" itemprop="datePublished">
+        <time datetime="{{ page.date | date(format="%Y-%m-%dT%H:%M:%S%:z") }}" class="date" itemprop="datePublished" pubdate>
             {{ page.date | date(format="%F") }}
         </time>
+        <address>
+            by <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+                <span itemprop="name">{{ config.extra.author }}</span>
+            </span>
+        </address>
+        {% if page.updated and page.updated != page.date %}
+        <time datetime="{{ page.updated | date(format="%Y-%m-%dT%H:%M:%S%:z") }}" class="date" itemprop="dateModified">
+            (Updated {{ page.updated | date(format="%F") }})
+        </time>
+        {% endif %}
     </div>
     <div itemprop="articleBody">
         {{ page.content | safe | replace(from="<!-- toc -->", to=post_macros::toc(toc=page.toc)) | safe }}
     </div>
     {% if page.taxonomies.tags or page.taxonomies.categories %}
     <hr class="small">
-    <div>
+    <div aria-label="Tags">
         {% if page.taxonomies.categories %}
         {% set category = page.taxonomies.categories[0] %}
         in <a href="{{ get_taxonomy_url(kind="categories", name=category) | safe }}">{{ category }}</a>
@@ -25,7 +87,7 @@
         {% if page.taxonomies.categories %}and{% endif %}
         tagged
         {% for tag in page.taxonomies.tags %}
-        <a href="{{ get_taxonomy_url(kind="tags", name=tag) | safe }}">{{ tag }}</a>
+        <a href="{{ get_taxonomy_url(kind="tags", name=tag) | safe }}" rel="tag">{{ tag }}</a>
         {% endfor %}
         {% endif %}
     </div>
