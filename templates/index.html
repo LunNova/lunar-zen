@@ -81,95 +81,6 @@
         {%- endblock twittermeta -%}
 
         {%- block extra_head -%}{%- endblock extra_head -%}
-{%- block structured_data -%}
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  "name": {{ config.title | json_encode() | safe }},
-  "url": {{ get_url(path="/", trailing_slash=true) | json_encode() | safe }},
-  {% if config.extra.github %}
-  "author": {
-    "@id": "https://github.com/{{ config.extra.github }}",
-    "@type": "Person",
-    "name": "{{ config.extra.author }}",
-    "url": "https://github.com/{{ config.extra.github }}"
-  },
-  {% endif %}
-  "mainEntity": {
-    "@type": "ItemList",
-    "itemListElement": [
-      {% set index = get_section(path="_index.md") %}
-      {% for s in index.subsections %}
-        {% set subsection = get_section(path=s) %}
-        {
-          "@type": "ListItem",
-          "position": {{ loop.index }},
-          "name": {{ subsection.title | json_encode() | safe }},
-          "url": {{ subsection.permalink | json_encode() | safe }}
-        }{% if not loop.last %},{% endif %}
-      {% endfor %}
-    ]
-  },
-  "breadcrumb": {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-    {% if page and page.ancestors %}
-    {% set len = page.ancestors | length %}
-    {% for section_path in page.ancestors %}
-    {
-        {% set section = get_section(path=section_path) %}
-        "@type": "ListItem",
-        "position": {{ loop.index }},
-        "name": {{ section.title | json_encode() | safe }},
-        "item": {{ section.permalink | json_encode() | safe }},
-        "desc": {{ section.description | default(value="") | json_encode() | safe }},
-        "url": {{ section.permalink | json_encode() | safe }}
-    },
-    {% endfor %}
-    {% else %}
-    {% set len = 0 %}
-    {% endif %}
-    {
-        "@type": "ListItem",
-        "position": {{ len + 1 }},
-        "name": {{ page.title | default(value=config.title) | json_encode | safe }},
-        "item": {{ page.permalink | default(value=page_url) | json_encode | safe }},
-        "desc": {{ page.description | default(value="") | json_encode | safe }},
-        "url": {{ page.permalink | default(value=page_url) | json_encode | safe }}
-    }
-    ]
-    }
-}
-</script>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "SiteNavigationElement",
-  "name": [
-    {% set index = get_section(path="_index.md") %}
-    {% for s in index.subsections %}
-      {% set subsection = get_section(path=s) %}
-      {{ subsection.title | json_encode() | safe }}{% if not loop.last %},{% endif %}
-    {% endfor %}
-    {% if config.extra.github %}
-    ,"{{ config.extra.github }} on GitHub"
-    {% endif %}
-  ],
-  "url": [
-    {% for s in index.subsections %}
-      {% set subsection = get_section(path=s) %}
-      {{ subsection.permalink | json_encode() | safe }}{% if not loop.last %},{% endif %}
-    {% endfor %}
-    {% if config.extra.github %}
-    ,"https://github.com/{{ config.extra.github }}"
-    {% endif %}
-  ]
-}
-</script>
-
-{%- endblock structured_data -%}
     </head>
     <body>
         <div class="content">
@@ -202,19 +113,19 @@
                     {%endblock header_left%}
                 </div>
                 <div class="header-right">
-                    <nav itemscope itemtype="http://schema.org/SiteNavigationElement" aria-label="Main navigation">
+                    <nav aria-label="Main navigation">
                     <ul>
                       {% set index = get_section(path="_index.md") %}
                       {% for s in index.subsections %}
                           {% set subsection = get_section(path=s) %}
-                          <li class="nav">
-                              <a itemprop="url" href="{{ subsection.permalink | safe}}"><span itemprop="name">{{ subsection.title }}</span></a>
+                          <li>
+                              <a href="{{ subsection.permalink | safe}}"><span itemprop="name">{{ subsection.title }}</span></a>
                           </li>
                       {% endfor %}
                       {% if config.extra.github %}
-                      <li class="nav">
-                          <a itemprop="url" href="https://github.com/{{ config.extra.github }}" aria-label="GitHub">
-                            <span itemprop="name"><img class="icon" height=24 width=24 src="{{ get_url(path="icons/github.svg") }}" alt="Github"></span>
+                      <li>
+                          <a href="https://github.com/{{ config.extra.github }}" aria-label="GitHub">
+                            <img class="icon" height=24 width=24 src="{{ get_url(path="icons/github.svg") }}" alt="Github"></span>
                           </a>
                       </li>
                       {% endif %}
@@ -293,6 +204,102 @@
                 </small>
             </div>
         {% endblock footer %}
+{%- block structured_data -%}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": {{ config.title | json_encode() | safe }},
+    "abstract": {{ config.description | json_encode() | safe }},
+    "license": {{ config.extra.license_url | json_encode() | safe }},
+    "description": {{ config.description | json_encode() | safe }},
+    "inLanguage": "en",
+    "copyrightYear": {{ now() | date(format="%Y") }},
+    "datePublished": {{ now() | date(format="%Y-%m-%d") | json_encode() | safe }},
+    "dateModified": {{ now() | date(format="%Y-%m-%d") | json_encode() | safe }},
+    "url": {{ get_url(path="/", trailing_slash=true) | json_encode() | safe }},
+    {% if config.extra.github %}
+    "author": {
+    "@id": "https://github.com/{{ config.extra.github }}",
+    "@type": "Person",
+    "name": "{{ config.extra.author }}",
+    "url": "https://github.com/{{ config.extra.github }}"
+    },
+    {% endif %}
+    "mainEntity": {
+    "@type": "ItemList",
+    "itemListElement": [
+        {% set index = get_section(path="_index.md") %}
+        {% for s in index.subsections %}
+        {% set subsection = get_section(path=s) %}
+        {
+            "@type": "ListItem",
+            "position": {{ loop.index }},
+            "name": {{ subsection.title | json_encode() | safe }},
+            "url": {{ subsection.permalink | json_encode() | safe }}
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ]
+    },
+    "breadcrumb": {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+    {% if page and page.ancestors %}
+    {% set len = page.ancestors | length %}
+    {% for section_path in page.ancestors %}
+    {
+        {% set section = get_section(path=section_path) %}
+        "@type": "ListItem",
+        "position": {{ loop.index }},
+        "name": {{ section.title | json_encode() | safe }},
+        "item": {{ section.permalink | json_encode() | safe }},
+        "desc": {{ section.description | default(value="") | json_encode() | safe }},
+        "url": {{ section.permalink | json_encode() | safe }}
+    },
+    {% endfor %}
+    {% else %}
+    {% set len = 0 %}
+    {% endif %}
+    {
+        "@type": "ListItem",
+        "position": {{ len + 1 }},
+        "name": {{ page.title | default(value=config.title) | json_encode | safe }},
+        "item": {{ page.permalink | default(value=page_url) | json_encode | safe }},
+        "desc": {{ page.description | default(value="") | json_encode | safe }},
+        "url": {{ page.permalink | default(value=page_url) | json_encode | safe }}
+    }
+    ]
+    }
+}
+</script>
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "SiteNavigationElement",
+    "name": [
+    {% set index = get_section(path="_index.md") %}
+    {% for s in index.subsections %}
+        {% set subsection = get_section(path=s) %}
+        {{ subsection.title | json_encode() | safe }}{% if not loop.last %},{% endif %}
+    {% endfor %}
+    {% if config.extra.github %}
+    ,"{{ config.extra.github }} on GitHub"
+    {% endif %}
+    ],
+    "url": [
+    {% for s in index.subsections %}
+        {% set subsection = get_section(path=s) %}
+        {{ subsection.permalink | json_encode() | safe }}{% if not loop.last %},{% endif %}
+    {% endfor %}
+    {% if config.extra.github %}
+    ,"https://github.com/{{ config.extra.github }}"
+    {% endif %}
+    ]
+}
+</script>
+
+{%- endblock structured_data -%}
         </footer>
     {% endblock body%}
         </div>
