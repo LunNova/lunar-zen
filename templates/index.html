@@ -26,7 +26,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1" />
 
         <title>{{ title }}</title>
-        <meta name="description" content="{{ config.description }}">
+        <meta name="description" content="{{ page.description | default(value=config.description) }}">
         <meta name="author" content="{{ page.author | default(value=config.extra.meta_author) | default() }}">
         {% block favicon -%}
         <link rel="icon" href="{{ get_url(path="favicon.ico") }}">
@@ -50,7 +50,7 @@
         {%- endif -%}
         {%- endblock feed_link -%}
         {% if config.extra.head_comment %}
-        <!-- {{ config.extra.head_comment }} -->
+        <!-- {{ config.extra.head_comment | safe }} -->
         {% endif %}
         {% if config.extra.github %}
         <link rel="author" href="https://github.com/{{ config.extra.github }}">
