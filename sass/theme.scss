@@ -89,8 +89,8 @@ nav {
     text-transform: lowercase;
 }
 
-.nav, address {
-    display: inline;
+.nav, address, nav li {
+    display: inline
 }
 
 .home-link {
