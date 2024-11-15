@@ -78,6 +78,30 @@
     </div>
     {% if page.taxonomies.tags or page.taxonomies.categories %}
     <hr class="small">
+    <div class="bibtex-citation">
+        <details>
+            <summary>Cite as BibTeX</summary>
+            <pre data-lang="BibTeX"><code>@misc{{"{"}}{% if page.slug %}{{ page.slug }}{% else %}{{ page.title | slugify }}{% endif %},
+    author = {{"{"}}{{config.extra.author}}{{"}"}},
+    title = {{"{"}}{{page.title}}{{"}"}},
+    year = {{"{"}}{{page.date | date(format="%Y")}}{{"}"}},
+    url = {{"{"}}{{page.permalink}}{{"}"}},
+    howpublished = {{"{"}}{{page.permalink}}{{"}"}},
+    urldate = {{"{"}}{{ page.date | date(format="%Y-%m-%d")}}{{"}"}}{% if page.description %},
+    note = {{"{"}}{{config.title}} - {{page.description}}{{"}"}}{% endif %}
+}</code></pre>
+        </details>
+    </div>
+    <hr class="small">
+    <div class="prev-next-links">
+        {% if page.lower %}
+            <a href="{{ page.lower.permalink | safe }}" class="prev-link">&laquo; {{ page.lower.title }}</a>
+        {% endif %}
+        {% if page.higher %}
+            <a href="{{ page.higher.permalink | safe }}" class="next-link">{{ page.higher.title }} &raquo;</a>
+        {% endif %}
+    </div>
+
     <div aria-label="Tags">
         {% if page.taxonomies.categories %}
         {% set category = page.taxonomies.categories[0] %}
@@ -87,7 +111,7 @@
         {% if page.taxonomies.categories %}and{% endif %}
         tagged
         {% for tag in page.taxonomies.tags %}
-        <a href="{{ get_taxonomy_url(kind="tags", name=tag) | safe }}" rel="tag">{{ tag }}</a>
+        <a href="{{ get_taxonomy_url(kind="tags", name=tag) | safe }}" rel="tag nofollow">{{ tag }}</a>
         {% endfor %}
         {% endif %}
     </div>

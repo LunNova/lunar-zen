@@ -56,6 +56,15 @@
         <link rel="author" href="https://github.com/{{ config.extra.github }}">
         {% endif %}
 
+        {% if page %}
+            {% if page.higher %}
+                <link rel="prev" href="{{ page.higher.permalink }}">
+            {% endif %}
+            {% if page.lower %}
+                <link rel="next" href="{{ page.lower.permalink }}">
+            {% endif %}
+        {% endif %}
+
         {% if current_path and current_path is starting_with("/tags/") %}
         <!-- Noindex tag pages because they're "thin" and don't have any additional content other than a list of posts -->
         <!-- FIXME: tags with many pages might actually be useful to index-->
