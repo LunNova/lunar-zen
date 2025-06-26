@@ -244,8 +244,10 @@ pre[data-lang] {
     background-color: midnightblue !important;
 }
 
-.footnote-definition { font-size: 75%; }
+.footnote-definition { font-size: 95%; }
 .footnote-definition p { display: inline; } // https://github.com/getzola/zola/issues/1285
+figcaption p { display: inline; }
+sup + sup { margin-left: 0.25em; }
 
 pre, code {
     white-space: pre-wrap;
