@@ -231,7 +231,7 @@ code {
     font: 16px $font-mono;
 }
 
-p > code {
+p > code, li > code {
     font-weight: bold;
     color: $blue_light;
 }
