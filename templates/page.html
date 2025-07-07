@@ -54,11 +54,11 @@
 {% block main %}
 <article itemscope itemtype="http://schema.org/BlogPosting" itemid="{{ page.permalink | safe }}">
     <div>
-        <h1 itemprop="name">{{ page.title }}</h1>
+        <h1 class="topline" itemprop="name">{{ page.title }}</h1>
         {% if page.description %}
         <span class="article-description" itemprop="description"><em>{{ page.description }}</em></span>
         {% endif %}
-        <hr class="small">
+        <span style="float: right;">
         <time datetime="{{ page.date | date(format="%Y-%m-%dT%H:%M:%S%:z") }}" class="date" itemprop="datePublished" pubdate>
             {{ page.date | date(format="%F") }}
         </time>
@@ -67,6 +67,8 @@
                 <span itemprop="name">{{ config.extra.author }}</span>
             </span>
         </address>
+        </span>
+        <hr class="small">
         {% if page.updated and page.updated != page.date %}
         <time datetime="{{ page.updated | date(format="%Y-%m-%dT%H:%M:%S%:z") }}" class="date" itemprop="dateModified">
             (Updated {{ page.updated | date(format="%F") }})

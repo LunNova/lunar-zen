@@ -2,7 +2,7 @@
 
 {% block main %}
     {% if section.pages %}
-        <h1>{{ section.title }}</h1>
+        <h1 class="topline">{{ section.title }}</h1>
         <hr class="small">
         {% for p in section.pages %}
                 {{ post_macros::page_in_list(page=p) }}
@@ -13,7 +13,7 @@
     {% else %}
         <article itemscope itemtype="http://schema.org/BlogPosting">
             <div itemprop="headline">
-                <h1>{{ section.title }}</h1>
+                <h1 class="topline">{{ section.title }}</h1>
                 <hr class="small">
             </div>
             <div itemprop="articleBody">
