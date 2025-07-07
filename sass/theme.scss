@@ -290,6 +290,12 @@ hr.small {
     height: 0.2em;
 }
 
+blockquote {
+    margin-left: 1em;
+    padding-left: 0.5em;
+    border-left: 2px solid $luna_body_fill;
+}
+
 hr + p, hr + blockquote {
     margin-top: 0;
 }
