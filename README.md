@@ -1,3 +1,5 @@
+no longer maintaining this forked theme, inlined into https://github.com/LunNova/Blog/tree/main/theme and no longer targeting zola. very diverged.
+
 # Oceanic Zen
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/e90897e9-f3e3-4906-b647-11a918af3a3b/deploy-status)](https://app.netlify.com/sites/oceanic-zen/deploys)
